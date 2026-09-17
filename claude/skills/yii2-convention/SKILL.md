@@ -1,0 +1,64 @@
+---
+name: yii2-convention
+description: This skill should be used when generating or reviewing PHP code in a Yii2 (advanced template) application — for example when the user asks to "create a business logic model", "add a Yii2 controller action", "create a Yii2 module", "add a service class", "follow Yii2 convention", or generates code touching a `backend/modules/**/models`, `frontend/modules/**/models`, `console/modules/**/models`, or the corresponding `**/controllers` folder.
+version: 0.1.0
+---
+
+# Yii2 Application Convention
+
+Defines how Yii2 (advanced template) applications are organized — applications, modules, services, business logic models, and controllers — and the exact code shape to generate for each.
+
+## Core Concepts
+
+### Application
+The advanced template ships three applications: `backend`, `frontend`, `console`. `common` is not an application; other applications may be added per project (e.g. `api`). Use the alias `@app` to refer to the current application in convention text and paths; when generating code, replace `@app` with the concrete application name (`backend`, `frontend`, etc.) in namespaces and file paths.
+
+### Module
+A module groups features that share a purpose (e.g. `loyalty`, covering collect, redeem, and rule management). Nest module folders as:
+`@app[/modules/<MODULE-NAME>[/modules/<SUB-MODULE-NAME>[..]]]`
+
+### Service
+A service handles non-business logic: external I/O such as cloud storage uploads or third-party API calls. Inject services into business logic models through `__construct()`.
+
+### Business Logic Model
+Handles exactly one business operation.
+
+- Location: `@app[/modules/<MODULE-NAME>[/modules/<SUB-MODULE-NAME>[..]]]/models/`.
+- Usable only by controllers within the same module (not submodules) and by its own test class.
+- Extends `yii\base\Model`.
+- Public attributes represent the inputs the operation needs; `rules()` declares validators for each attribute.
+- Exposes exactly one public method, `execute()`, which validates first (`$this->validate()`), then runs the logic. Split large logic into private subprocess methods.
+- Each subprocess should throw `yii\base\Exception` on failure; `execute()` catches it and reports via `$this->addError()`.
+- Depends on services injected via `__construct()`.
+- Implements `toArray()` to define the HTTP response payload.
+
+Generate models following `examples/business-logic-model.php`.
+
+### Test unit for a business logic model
+- File: `@app/tests/unit/[<MODULE-NAME>_[<SUB-MODULE-NAME>_[..]]][MODEL-NAME]Test.php` (e.g. `Loyalty_CollectRewardCalculationTest.php`, `Loyalty_Manager_CollectRewardRuleTest.php`).
+- Extends `Codeception\Test\Unit`.
+- Builds the model with `Yii::createObject()`, sets attributes with `setAttributes()`, calls `execute()`, then asserts the result with `verify()`.
+
+Generate tests following `examples/model-test.php`.
+
+### Controller
+Groups actions where each action uses exactly one business logic model.
+
+- Name controllers with at most 2 words, since the name becomes a URL path segment; name it after the sub-feature (e.g. `CollectController` inside the `loyalty` module).
+- Guard every action with an `AccessControl` rule using permission name `@app[_<module-name>[_<sub-module-name>[..]]]:<controller-name>::<action-name>` (e.g. `frontend_loyalty:collect::calculate`).
+- Action body: build the model with `Yii::createObject()`, load request data with `load($this->request->post(), "")` (empty scenario string, since it's a REST API), call `execute()`, and return the model — Yii2 serializes it through `toArray()`.
+
+Generate controllers following `examples/controller.php`.
+
+## Workflow
+
+1. Identify the module (and submodule, if any) the feature belongs to.
+2. Create the business logic model under `<module>/models/`, following `examples/business-logic-model.php`.
+3. Create its test under `@app/tests/unit/`, following `examples/model-test.php`.
+4. Add or extend the controller under `<module>/controllers/`, following `examples/controller.php`, wiring the new action's permission into `behaviors()`.
+
+## Additional Resources
+
+- `examples/business-logic-model.php` — business logic model template (attributes, `rules()`, `execute()`, `toArray()`).
+- `examples/controller.php` — controller template with `AccessControl` and `VerbFilter`.
+- `examples/model-test.php` — Codeception unit test template for a business logic model.
