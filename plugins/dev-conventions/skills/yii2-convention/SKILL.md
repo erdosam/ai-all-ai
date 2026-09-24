@@ -1,12 +1,12 @@
 ---
 name: yii2-convention
-description: This skill should be used when generating or reviewing PHP code in a Yii2 (advanced template) application — for example when the user asks to "create a business logic model", "add a Yii2 controller action", "create a Yii2 module", "add a service class", "follow Yii2 convention", or generates code touching a `backend/modules/**/models`, `frontend/modules/**/models`, `console/modules/**/models`, or the corresponding `**/controllers` folder.
+description: This skill should be used when generating or reviewing PHP code in a Yii2 (advanced template) application — for example when the user asks to "create a use case", "create a business logic model", "add a Yii2 controller action" for a non-CRUD endpoint, "create a Yii2 module", "add a service class", "follow Yii2 convention", or generates code touching a `backend/modules/**/models`, `frontend/modules/**/models`, `console/modules/**/models`, or the corresponding `**/controllers` folder.
 version: 0.1.0
 ---
 
 # Yii2 Application Convention
 
-Defines how Yii2 (advanced template) applications are organized — applications, modules, services, business logic models, and controllers — and the exact code shape to generate for each.
+Defines how Yii2 (advanced template) applications are organized — applications, modules, services, use cases, and controllers — and the exact code shape to generate for each.
 
 ## Core Concepts
 
@@ -18,10 +18,10 @@ A module groups features that share a purpose (e.g. `loyalty`, covering collect,
 `@app[/modules/<MODULE-NAME>[/modules/<SUB-MODULE-NAME>[..]]]`
 
 ### Service
-A service handles non-business logic: external I/O such as cloud storage uploads or third-party API calls. Inject services into business logic models through `__construct()`.
+A service handles non-business logic: external I/O such as cloud storage uploads or third-party API calls. Inject services into use cases through `__construct()`.
 
-### Business Logic Model
-Handles exactly one business operation.
+### Use Case (Business Logic Model)
+A use case — the term used interchangeably with "business logic model" in this codebase — handles exactly one non-CRUD business process behind one API endpoint: an operation that is more than create/read/update/delete on a single entity, typically validating and orchestrating across more than one entity and/or service. Plain single-entity CRUD does not need a use case; expose it directly through Yii2's standard REST/ActiveRecord controller instead.
 
 - Location: `@app[/modules/<MODULE-NAME>[/modules/<SUB-MODULE-NAME>[..]]]/models/`.
 - Usable only by controllers within the same module (not submodules) and by its own test class.
@@ -32,17 +32,17 @@ Handles exactly one business operation.
 - Depends on services injected via `__construct()`.
 - Implements `toArray()` to define the HTTP response payload.
 
-Generate models following `examples/business-logic-model.php`.
+Generate use cases following `examples/business-logic-model.php`.
 
-### Test unit for a business logic model
+### Test unit for a use case
 - File: `@app/tests/unit/[<MODULE-NAME>_[<SUB-MODULE-NAME>_[..]]][MODEL-NAME]Test.php` (e.g. `Loyalty_CollectRewardCalculationTest.php`, `Loyalty_Manager_CollectRewardRuleTest.php`).
 - Extends `Codeception\Test\Unit`.
-- Builds the model with `Yii::createObject()`, sets attributes with `setAttributes()`, calls `execute()`, then asserts the result with `verify()`.
+- Builds the use case with `Yii::createObject()`, sets attributes with `setAttributes()`, calls `execute()`, then asserts the result with `verify()`.
 
 Generate tests following `examples/model-test.php`.
 
 ### Controller
-Groups actions where each action uses exactly one business logic model.
+Groups actions where each action uses exactly one use case.
 
 - Name controllers with at most 2 words, since the name becomes a URL path segment; name it after the sub-feature (e.g. `CollectController` inside the `loyalty` module).
 - Guard every action with an `AccessControl` rule using permission name `@app[_<module-name>[_<sub-module-name>[..]]]:<controller-name>::<action-name>` (e.g. `frontend_loyalty:collect::calculate`).
@@ -53,12 +53,13 @@ Generate controllers following `examples/controller.php`.
 ## Workflow
 
 1. Identify the module (and submodule, if any) the feature belongs to.
-2. Create the business logic model under `<module>/models/`, following `examples/business-logic-model.php`.
-3. Create its test under `@app/tests/unit/`, following `examples/model-test.php`.
-4. Add or extend the controller under `<module>/controllers/`, following `examples/controller.php`, wiring the new action's permission into `behaviors()`.
+2. Confirm the feature actually needs a use case — a new API endpoint whose process is more than plain CRUD on one entity. If it's plain CRUD, use Yii2's standard REST/ActiveRecord controller instead and skip the rest of this workflow.
+3. Create the use case under `<module>/models/`, following `examples/business-logic-model.php`.
+4. Create its test under `@app/tests/unit/`, following `examples/model-test.php`.
+5. Add or extend the controller under `<module>/controllers/`, following `examples/controller.php`, wiring the new action's permission into `behaviors()`.
 
 ## Additional Resources
 
-- `examples/business-logic-model.php` — business logic model template (attributes, `rules()`, `execute()`, `toArray()`).
+- `examples/business-logic-model.php` — use case template (attributes, `rules()`, `execute()`, `toArray()`).
 - `examples/controller.php` — controller template with `AccessControl` and `VerbFilter`.
-- `examples/model-test.php` — Codeception unit test template for a business logic model.
+- `examples/model-test.php` — Codeception unit test template for a use case.

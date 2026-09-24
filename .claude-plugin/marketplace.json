@@ -1,0 +1,16 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "ai-all-ai-conventions",
+  "description": "Internal marketplace for team Claude Code plugins: coding conventions for PHP8, Go, Flutter, TypeScript, and Angular projects.",
+  "owner": {
+    "name": "erdosam",
+    "email": "asriliving@asri.co.id"
+  },
+  "plugins": [
+    {
+      "name": "dev-conventions",
+      "description": "Coding convention skills for PHP8, Go, Flutter, TypeScript, and Angular projects: general class/struct member ordering, plus Yii2 and Angular application architecture conventions.",
+      "source": "./plugins/dev-conventions"
+    }
+  ]
+}

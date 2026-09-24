@@ -1,0 +1,10 @@
+{
+  "name": "dev-conventions",
+  "version": "0.1.0",
+  "description": "Coding convention skills for PHP8, Go, Flutter, TypeScript, and Angular projects: general class/struct member ordering, plus Yii2 and Angular application architecture conventions.",
+  "author": {
+    "name": "erdosam",
+    "email": "asriliving@asri.co.id"
+  },
+  "keywords": ["conventions", "php", "yii2", "go", "flutter", "typescript", "angular", "code-style"]
+}

@@ -5,9 +5,10 @@ use yii\base\Model;
 use yii\base\Exception;
 
 /**
- * Business logic model template.
- * One model = one business operation. Replace `frontend` with the target
- * application (backend/frontend/console/...) and adjust the module path.
+ * Use case (business logic model) template.
+ * One class = one non-CRUD business process behind one API endpoint.
+ * Replace `frontend` with the target application (backend/frontend/console/...)
+ * and adjust the module path.
  */
 class CollectRewardCalculation extends Model
 {
