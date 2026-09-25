@@ -9,9 +9,11 @@ use yii\filters\VerbFilter;
 use yii\rest\Controller;
 
 /**
- * Controller template. One action = one business logic model.
+ * Controller template. One action = one use case (business logic model).
  * Controller name is at most 2 words and doubles as the URL path segment.
  * Permission format: @app[_<module-name>[_<sub-module-name>[..]]]:<controller-name>::<action-name>
+ * The controller owns all HTTP-level errors — e.g. `throw new NotFoundHttpException(...)`
+ * belongs here, never inside a use case.
  */
 class CollectController extends Controller
 {

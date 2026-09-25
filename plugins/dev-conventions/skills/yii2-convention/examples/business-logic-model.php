@@ -32,7 +32,8 @@ class CollectRewardCalculation extends Model
         }
 
         // Business logic execution. Split large processes into private
-        // methods; each subprocess should throw yii\base\Exception on failure.
+        // methods; each subprocess should throw yii\base\Exception (never an
+        // HTTP exception — that's the controller's responsibility) on failure.
         try {
             $this->subProcess1();
             $this->subProcess2();

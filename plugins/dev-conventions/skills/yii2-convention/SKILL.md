@@ -1,7 +1,7 @@
 ---
 name: yii2-convention
 description: This skill should be used when generating or reviewing PHP code in a Yii2 (advanced template) application — for example when the user asks to "create a use case", "create a business logic model", "add a Yii2 controller action" for a non-CRUD endpoint, "create a Yii2 module", "add a service class", "follow Yii2 convention", or generates code touching a `backend/modules/**/models`, `frontend/modules/**/models`, `console/modules/**/models`, or the corresponding `**/controllers` folder.
-version: 0.1.0
+version: 0.2.0
 ---
 
 # Yii2 Application Convention
@@ -29,6 +29,7 @@ A use case — the term used interchangeably with "business logic model" in this
 - Public attributes represent the inputs the operation needs; `rules()` declares validators for each attribute.
 - Exposes exactly one public method, `execute()`, which validates first (`$this->validate()`), then runs the logic. Split large logic into private subprocess methods.
 - Each subprocess should throw `yii\base\Exception` on failure; `execute()` catches it and reports via `$this->addError()`.
+- Never throws an HTTP exception (`yii\web\HttpException` or a subclass) — a use case only knows business/validation failure, not HTTP status codes. It reports failure by returning `false` from `execute()` with errors added; only the controller decides what HTTP response that becomes.
 - Depends on services injected via `__construct()`.
 - Implements `toArray()` to define the HTTP response payload.
 
@@ -47,6 +48,7 @@ Groups actions where each action uses exactly one use case.
 - Name controllers with at most 2 words, since the name becomes a URL path segment; name it after the sub-feature (e.g. `CollectController` inside the `loyalty` module).
 - Guard every action with an `AccessControl` rule using permission name `@app[_<module-name>[_<sub-module-name>[..]]]:<controller-name>::<action-name>` (e.g. `frontend_loyalty:collect::calculate`).
 - Action body: build the model with `Yii::createObject()`, load request data with `load($this->request->post(), "")` (empty scenario string, since it's a REST API), call `execute()`, and return the model — Yii2 serializes it through `toArray()`.
+- Owns all HTTP-level error handling: the controller is the only place allowed to throw `yii\web\HttpException` (or a subclass, e.g. `NotFoundHttpException`) when an action needs to surface a specific HTTP status.
 
 Generate controllers following `examples/controller.php`.
 
