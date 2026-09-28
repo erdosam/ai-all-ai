@@ -1,7 +1,7 @@
 ---
 name: yii2-convention
 description: This skill should be used when generating or reviewing PHP code in a Yii2 (advanced template) application — for example when the user asks to "create a use case", "create a business logic model", "add a Yii2 controller action" for a non-CRUD endpoint, "create a Yii2 module", "add a service class", "follow Yii2 convention", or generates code touching a `backend/modules/**/models`, `frontend/modules/**/models`, `console/modules/**/models`, or the corresponding `**/controllers` folder.
-version: 0.2.0
+version: 0.3.0
 ---
 
 # Yii2 Application Convention
@@ -20,6 +20,18 @@ A module groups features that share a purpose (e.g. `loyalty`, covering collect,
 ### Service
 A service handles non-business logic: external I/O such as cloud storage uploads or third-party API calls. Inject services into use cases through `__construct()`.
 
+### Constructor property promotion (PHP8)
+Any class extending `yii\base\BaseObject` — directly, or via `Component`/`Model`, which covers both Service and Use Case classes — declares its injected dependencies as typed, `private`, promoted constructor properties, instead of separate property declarations with manual assignment. Keep the trailing `$config = []` parameter and forward it to `parent::__construct($config)`, since `Yii::createObject()` and Yii2's `Yii::configure()` mechanism rely on it:
+
+```php
+public function __construct(private MyType $att1, private MyType2 $att2, $config = [])
+{
+    parent::__construct($config);
+}
+```
+
+This applies to injected collaborators only. A use case's public, request-bound attributes (populated by `load()`, validated by `rules()`) stay plain public properties, not constructor parameters.
+
 ### Use Case (Business Logic Model)
 A use case — the term used interchangeably with "business logic model" in this codebase — handles exactly one non-CRUD business process behind one API endpoint: an operation that is more than create/read/update/delete on a single entity, typically validating and orchestrating across more than one entity and/or service. Plain single-entity CRUD does not need a use case; expose it directly through Yii2's standard REST/ActiveRecord controller instead.
 
@@ -30,7 +42,7 @@ A use case — the term used interchangeably with "business logic model" in this
 - Exposes exactly one public method, `execute()`, which validates first (`$this->validate()`), then runs the logic. Split large logic into private subprocess methods.
 - Each subprocess should throw `yii\base\Exception` on failure; `execute()` catches it and reports via `$this->addError()`.
 - Never throws an HTTP exception (`yii\web\HttpException` or a subclass) — a use case only knows business/validation failure, not HTTP status codes. It reports failure by returning `false` from `execute()` with errors added; only the controller decides what HTTP response that becomes.
-- Depends on services injected via `__construct()`.
+- Depends on services injected via `__construct()`, using PHP8 constructor property promotion (see "Constructor property promotion" above).
 - Implements `toArray()` to define the HTTP response payload.
 
 Generate use cases following `examples/business-logic-model.php`.

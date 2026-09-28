@@ -3,6 +3,7 @@ namespace frontend\modules\loyalty\models;
 
 use yii\base\Model;
 use yii\base\Exception;
+use frontend\modules\loyalty\services\RewardService;
 
 /**
  * Use case (business logic model) template.
@@ -13,8 +14,17 @@ use yii\base\Exception;
 class CollectRewardCalculation extends Model
 {
     // Attributes are generated based on what input the business logic needs.
+    // These stay public (and out of the constructor) so load()/rules() can
+    // populate and validate them from the request.
     public $attribute1;
     public $attribute2;
+
+    // Injected services use PHP8 constructor property promotion; $config is
+    // forwarded to parent::__construct() for Yii::createObject()/Yii::configure().
+    public function __construct(private RewardService $rewardService, $config = [])
+    {
+        parent::__construct($config);
+    }
 
     public function rules()
     {
