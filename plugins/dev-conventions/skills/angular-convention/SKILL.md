@@ -1,7 +1,7 @@
 ---
 name: angular-convention
-description: This skill should be used when creating, locating, or restructuring files in an Angular application — for example when the user asks to "add a feature", "create a page", "add a shared component", "where does this file belong", or "follow our Angular convention" — or when generating code under `src/app/core`, `src/app/features`, or `src/app/shared`. Covers the core/features/shared layout, feature grouping, import-direction rules, and file naming.
-version: 0.1.0
+description: This skill should be used when creating, locating, or restructuring files in an Angular application, or writing any UI — for example when the user asks to "add a feature", "create a page", "add a shared component", "style a component", "use Angular Material", "where does this file belong", or "follow our Angular convention" — or when generating code under `src/app/core`, `src/app/features`, or `src/app/shared`. Covers the core/features/shared layout, feature grouping, import-direction rules, file naming, and the Angular Material UI requirement.
+version: 0.3.0
 ---
 
 # Angular Application Convention
@@ -25,6 +25,22 @@ An optional level above features, grouping features that share a domain (e.g. ev
 ### Shared
 Reusable and free of business logic: `components/`, `directives/`, `pipes/`. Shared code is stateless and knows nothing about any feature. Do not introduce a `SharedModule` barrel — it defeats tree-shaking by dragging every export into each consumer; standalone components import exactly what they use.
 
+### UI (Angular Material)
+All UI/UX — pages and shared presentational components alike — is built on [Angular Material](https://material.angular.io), not raw HTML/CSS primitives built from scratch. Import only the specific `Mat*Module`s a component actually uses (e.g. `MatButtonModule`, `MatChipsModule`), directly into that component's own `imports` array. Never introduce an aggregating `MaterialModule` barrel — that reintroduces the exact tree-shaking problem the `Shared` section rules out for a `SharedModule` barrel. Theme setup (palette, typography, density) lives in `styles/_theme.scss`.
+
+Form fields default to floating labels. Set this once, app-wide, via `MAT_FORM_FIELD_DEFAULT_OPTIONS` in `app.config.ts` — never by repeating `floatLabel` on each `<mat-form-field>` instance:
+
+```ts
+import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    // ...other providers
+    { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { floatLabel: 'always' } },
+  ],
+};
+```
+
 ## Layout
 
 ```
@@ -40,7 +56,7 @@ src/
           models/  services/
     shared/        components/ directives/ pipes/
     app.ts  app.config.ts  app.routes.ts
-  styles/          _variables.scss, _mixins.scss — tokens and helpers
+  styles/          _theme.scss, _variables.scss, _mixins.scss — Material theme, tokens, and helpers
   styles.scss      imports the partials; keep it thin
 public/            i18n/ images/ icons/ static/
 ```
@@ -74,4 +90,4 @@ If the project provides its own generators for these folders, prefer them over c
 
 - `examples/feature.routes.ts` — a feature's routes file with a lazy-loaded page.
 - `examples/page.ts` — routed page template with external template and styles.
-- `examples/ui-component.ts` — shared presentational component with inline template and styles.
+- `examples/ui-component.ts` — shared presentational component with inline template and styles, built on Angular Material.
