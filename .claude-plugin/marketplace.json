@@ -9,7 +9,7 @@
   "plugins": [
     {
       "name": "dev-conventions",
-      "description": "Coding convention skills for PHP8, Go, Flutter, TypeScript, and Angular projects: general class/struct member ordering, plus Yii2 and Angular application architecture conventions.",
+      "description": "Coding convention skills for PHP8, Go, Flutter, TypeScript, and Angular projects: general class/struct member ordering, plus Go clean architecture, Yii2 and Angular application architecture conventions.",
       "source": "./plugins/dev-conventions"
     }
   ]

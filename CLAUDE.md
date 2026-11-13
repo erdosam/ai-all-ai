@@ -7,5 +7,6 @@ See [README.md](README.md) for how another repo installs and uses this plugin (m
 ## Plugin contents
 
 - `plugins/dev-conventions/skills/general-convention/` — class/struct member ordering convention; applies to every language in the stack.
+- `plugins/dev-conventions/skills/go-clean-convention/` — Go service architecture on evrone/go-clean-template: the entity/usecase/repo/controller layers, dependency direction, contracts and constructors, multi-binary repositories, and the Makefile workflow.
 - `plugins/dev-conventions/skills/yii2-convention/` — Yii2 (advanced template) application architecture: modules, services, use cases (business logic models), and controllers.
 - `plugins/dev-conventions/skills/angular-convention/` — Angular application file structure: the core/features/shared layout, feature grouping, import-direction rules, and file naming.
